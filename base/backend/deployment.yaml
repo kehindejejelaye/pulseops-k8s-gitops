@@ -20,33 +20,24 @@ spec:
           ports:
             - containerPort: 5000
               name: http
+          # 1. Non-secret environment variables loaded from ConfigMap
+          envFrom:
+            - configMapRef:
+                name: pulseops-backend-config
+          # 2. Secret environment variables loaded from Secret
           env:
-            - name: PORT
-              value: "5000"
-            - name: NODE_ENV
-              value: "production"
-            # Points to the headless PostgreSQL service in the same namespace
-            - name: DB_HOST
-              value: "pulseops-postgres-headless"
-            - name: DB_PORT
-              value: "5432"
-            - name: DB_USER
-              value: "postgres"
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: pulseops-db-secret
                   key: password
-            - name: DB_NAME
-              value: "pulseops"
           resources:
             requests:
-              cpu: "100m"      # 0.1 CPU core guaranteed
-              memory: "128Mi"  # 128MB RAM guaranteed
+              cpu: "100m"
+              memory: "128Mi"
             limits:
-              cpu: "300m"      # Max 0.3 CPU core
-              memory: "256Mi"  # Max 256MB RAM
-          # Probes monitor pod health automatically
+              cpu: "300m"
+              memory: "256Mi"
           livenessProbe:
             httpGet:
               path: /healthz

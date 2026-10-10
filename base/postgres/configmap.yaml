@@ -1,0 +1,11 @@
+# ConfigMap for PostgreSQL non-confidential variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pulseops-postgres-config
+  labels:
+    app: pulseops-postgres
+data:
+  POSTGRES_USER: "postgres"
+  POSTGRES_DB: "pulseops"
+  PGDATA: "/var/lib/postgresql/data/pgdata"

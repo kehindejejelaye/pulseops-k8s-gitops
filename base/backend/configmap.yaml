@@ -1,0 +1,14 @@
+# ConfigMap stores non-confidential configuration values as key-value pairs.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pulseops-backend-config
+  labels:
+    app: pulseops-backend
+data:
+  PORT: "5000"
+  NODE_ENV: "production"
+  DB_HOST: "pulseops-postgres-headless"
+  DB_PORT: "5432"
+  DB_USER: "postgres"
+  DB_NAME: "pulseops"
