@@ -1,8 +1,23 @@
-# ClusterIP service provides internal load balancing and stable DNS within the cluster
 apiVersion: v1
 kind: Service
 metadata:
   name: pulseops-backend-service
+  labels:
+    app: pulseops-backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: 5000
+      name: http
+  selector:
+    app: pulseops-backend
+---
+# Alias service for reverse proxies resolving 'http://backend:5000'
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
   labels:
     app: pulseops-backend
 spec:
