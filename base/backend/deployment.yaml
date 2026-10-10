@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulseops-backend
+  labels:
+    app: pulseops-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pulseops-backend
+  template:
+    metadata:
+      labels:
+        app: pulseops-backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/kehindejejelaye/pulseops-backend:latest
+          ports:
+            - containerPort: 5000
+              name: http
+          env:
+            - name: PORT
+              value: "5000"
+            - name: NODE_ENV
+              value: "production"
+            # Points to the headless PostgreSQL service in the same namespace
+            - name: DB_HOST
+              value: "pulseops-postgres-headless"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pulseops-db-secret
+                  key: password
+            - name: DB_NAME
+              value: "pulseops"
+          resources:
+            requests:
+              cpu: "100m"      # 0.1 CPU core guaranteed
+              memory: "128Mi"  # 128MB RAM guaranteed
+            limits:
+              cpu: "300m"      # Max 0.3 CPU core
+              memory: "256Mi"  # Max 256MB RAM
+          # Probes monitor pod health automatically
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5

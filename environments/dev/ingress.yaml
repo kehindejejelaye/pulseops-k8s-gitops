@@ -1,0 +1,39 @@
+# Ingress routes external traffic into the cluster.
+# By leaving "host" empty, this Ingress routes traffic using the raw Load Balancer IP
+# or any nip.io wildcard DNS without needing to purchase a domain name!
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pulseops-ingress
+  namespace: dev
+  annotations:
+    # Use the Ingress-NGINX controller
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - http:
+        paths:
+          # 1. API traffic routes to backend service
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: pulseops-backend-service
+                port:
+                  number: 5000
+          # 2. Health check endpoint for probes
+          - path: /healthz
+            pathType: Exact
+            backend:
+              service:
+                name: pulseops-backend-service
+                port:
+                  number: 5000
+          # 3. All other traffic (root) routes to frontend dashboard
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pulseops-frontend-service
+                port:
+                  number: 80

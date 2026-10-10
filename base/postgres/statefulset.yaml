@@ -1,0 +1,57 @@
+# StatefulSet is used for stateful workloads like databases.
+# It ensures each pod gets the exact same storage volume even across restarts.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pulseops-postgres
+  labels:
+    app: pulseops-postgres
+spec:
+  serviceName: pulseops-postgres-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pulseops-postgres
+  template:
+    metadata:
+      labels:
+        app: pulseops-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pulseops-db-secret
+                  key: password
+            - name: POSTGRES_DB
+              value: "pulseops"
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+  # volumeClaimTemplates automatically asks DigitalOcean to provision an SSD volume
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: "do-block-storage" # DigitalOcean Managed Block Storage
+        resources:
+          requests:
+            storage: 5Gi # DigitalOcean minimum volume size

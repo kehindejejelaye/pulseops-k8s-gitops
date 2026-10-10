@@ -1,0 +1,15 @@
+# A Headless Service provides direct, stable DNS names for StatefulSet pods
+# instead of load balancing across them randomly.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pulseops-postgres-headless
+  labels:
+    app: pulseops-postgres
+spec:
+  clusterIP: None  # "None" makes this a Headless Service
+  ports:
+    - port: 5432
+      name: postgres
+  selector:
+    app: pulseops-postgres
