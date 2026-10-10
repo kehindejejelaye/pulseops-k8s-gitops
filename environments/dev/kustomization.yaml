@@ -5,8 +5,6 @@ namespace: dev
 
 resources:
   - namespace.yaml
-  - secret-store.yaml
-  - external-secret.yaml
   - ingress.yaml
   - ../../base
 
